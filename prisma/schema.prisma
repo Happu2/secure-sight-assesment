@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Easiest for local dev. The DATABASE_URL in .env should be "file:./dev.db"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+
+  // If you prefer PostgreSQL, uncomment the following:
+  // provider = "postgresql"
+  // url = env("DATABASE_URL")
+}
+
+// Represents a CCTV camera feed
+model Camera {
+  id        String     @id @default(cuid())
+  name      String
+  location  String
+  
+  // A camera can have many incidents
+  incidents Incident[]
+}
+
+// Represents a detected security incident
+model Incident {
+  id           String   @id @default(cuid())
+  type         String   // e.g., "Unauthorised Access", "Gun Threat", "Face Recognised"
+  tsStart      DateTime // The start timestamp of the incident
+  tsEnd        DateTime // The end timestamp of the incident
+  thumbnailUrl String   // URL to a placeholder image/thumbnail
+  resolved     Boolean  @default(false)
+  
+  // Each incident belongs to one camera
+  camera   Camera @relation(fields: [cameraId], references: [id])
+  cameraId String
+}
