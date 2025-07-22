@@ -1,21 +1,19 @@
-// components/IncidentPlayer.tsx
+// src/components/IncidentPlayer.tsx
 
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause } from 'lucide-react';
-
 interface IncidentPlayerProps {
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
   playbackPosition: number;
 }
 
-// Data for all available camera views
 const cameraFeeds = [
-  { name: 'Vault Camera', src: '/videoplayback.mp4' },
-  { name: 'Camera - 02', src: '/videoPlay.mp4' },
-  { name: 'Camera - 03', src: '/videoplayback3.mp4' },
+  { name: 'Vault Camera', src: '/videoplayback.mp4', type: 'video' },
+  { name: 'Camera - 02', src: '/videoPlay.mp4', type: 'video' },
+  { name: 'Camera - 03', src: '/videoplayback3.mp4', type: 'video' },
 ];
 
 const formatPositionToTimestamp = (position: number) => {
@@ -31,11 +29,9 @@ const formatPositionToTimestamp = (position: number) => {
 export default function IncidentPlayer({ isPlaying, setIsPlaying, playbackPosition }: IncidentPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   
-  // State to track the main video and the two thumbnails
   const [mainFeed, setMainFeed] = useState(cameraFeeds[0]);
   const [thumbnailFeeds, setThumbnailFeeds] = useState([cameraFeeds[1], cameraFeeds[2]]);
 
-  // This effect synchronizes the play/pause state with the video element
   useEffect(() => {
     if (videoRef.current) {
         if (isPlaying) {
@@ -44,29 +40,24 @@ export default function IncidentPlayer({ isPlaying, setIsPlaying, playbackPositi
             videoRef.current.pause();
         }
     }
-  }, [isPlaying, mainFeed]); // Re-run if the main feed changes
+  }, [isPlaying, mainFeed]);
 
-  // Function to handle swapping videos when a thumbnail is clicked
   const handleThumbnailClick = (clickedFeed: typeof cameraFeeds[0]) => {
-    const currentMainFeed = mainFeed;
-    // The new main feed is the one that was clicked
+    // FIX: Removed the unused 'currentMainFeed' variable
     setMainFeed(clickedFeed);
-    // The new thumbnails are the old main feed plus the other non-clicked thumbnail
     setThumbnailFeeds(cameraFeeds.filter(feed => feed.name !== clickedFeed.name));
   };
 
   return (
     <div className="flex flex-col h-full">
       <div className="bg-gray-900 rounded-lg flex-grow relative overflow-hidden">
-        {/* The `key` prop is crucial here. It forces React to re-create the video element 
-            when the src changes, ensuring the new video loads correctly. */}
         <video
           key={mainFeed.src}
           ref={videoRef}
           src={mainFeed.src}
           loop
           muted
-          autoPlay={isPlaying} // Autoplay if the state is already 'playing'
+          autoPlay={isPlaying}
           className="w-full h-full object-cover"
         />
         <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 px-3 py-1 rounded">
@@ -91,7 +82,6 @@ export default function IncidentPlayer({ isPlaying, setIsPlaying, playbackPositi
                 <button>⚙️</button>
             </div>
         </div>
-        {/* Thumbnails are now rendered dynamically with onClick handlers */}
         <div className="flex gap-2">
           {thumbnailFeeds.map((feed) => (
             <div
@@ -105,7 +95,7 @@ export default function IncidentPlayer({ isPlaying, setIsPlaying, playbackPositi
                 muted
                 autoPlay
                 playsInline
-                className="w-full h-full object-cover pointer-events-none" // pointer-events-none to pass clicks to the div
+                className="w-full h-full object-cover pointer-events-none"
               />
               <p className="absolute bottom-1 left-2 text-xs bg-black bg-opacity-50 px-1 rounded">
                 {feed.name}

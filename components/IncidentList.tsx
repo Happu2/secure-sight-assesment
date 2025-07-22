@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
+import Image from 'next/image'; // FIX: Import the Next.js Image component
 
 // Define the types for our data
 type Camera = {
@@ -29,17 +30,15 @@ const formatTime = (dateString: string) =>
 
 export default function IncidentList() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  // 1. Add state for the resolved count
   const [resolvedCount, setResolvedCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch both the unresolved list and the resolved count at the same time
         const [incidentsRes, countRes] = await Promise.all([
           fetch('/api/incidents?resolved=false'),
-          fetch('/api/incidents/count?resolved=true') // 2. Fetch the initial resolved count
+          fetch('/api/incidents/count?resolved=true')
         ]);
         
         const incidentsData = await incidentsRes.json();
@@ -47,41 +46,35 @@ export default function IncidentList() {
 
         setIncidents(incidentsData);
         setResolvedCount(countData.count);
-
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
   const handleResolve = async (incidentId: string) => {
     const originalIncidents = incidents;
     setIncidents(currentIncidents => currentIncidents.filter(inc => inc.id !== incidentId));
-    // 3. Increment the count when an incident is resolved
     setResolvedCount(prevCount => prevCount + 1);
 
     try {
-      const response = await fetch(`/api/incidents/${incidentId}/resolve`, {
-        method: 'PATCH',
-      });
+      const response = await fetch(`/api/incidents/${incidentId}/resolve`, { method: 'PATCH' });
       if (!response.ok) {
         throw new Error('Failed to resolve incident on the server.');
       }
     } catch (error) {
       console.error(error);
-      // Revert UI if the API call fails
       setIncidents(originalIncidents);
-      setResolvedCount(prevCount => prevCount - 1); // Decrement count on failure
+      setResolvedCount(prevCount => prevCount - 1);
       alert('Failed to resolve incident. Please try again.');
     }
   };
 
   if (isLoading) {
-    return <div>Loading incidents...</div>;
+    return <div className="p-4">Loading incidents...</div>;
   }
 
   return (
@@ -93,7 +86,6 @@ export default function IncidentList() {
         </div>
         <button className="flex items-center gap-2 text-gray-400 border border-gray-600 px-3 py-1 rounded-full text-sm">
             <CheckCircle className="text-green-500" size={16} />
-            {/* 4. Display the dynamic count in the button */}
             {resolvedCount} resolved incidents
         </button>
       </div>
@@ -101,7 +93,14 @@ export default function IncidentList() {
       <ul className="space-y-3">
         {incidents.map((incident) => (
           <li key={incident.id} className="bg-gray-700 p-2 rounded-md flex items-center gap-4">
-            <img src={incident.thumbnailUrl} alt={incident.type} className="w-24 h-16 object-cover rounded" />
+            {/* FIX: Replaced <img> with next/image <Image> for optimization */}
+            <Image
+              src={incident.thumbnailUrl}
+              alt={incident.type}
+              width={96}  // Required for next/image
+              height={64} // Required for next/image
+              className="w-24 h-16 object-cover rounded"
+            />
             <div className="flex-grow">
               <p className="font-semibold text-red-500">{incident.type}</p>
               <p className="text-sm text-gray-400">{incident.camera.location}</p>

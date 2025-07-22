@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import IncidentList from '@/components/IncidentList';
 import IncidentPlayer from '@/components/IncidentPlayer';
 import IncidentTimeline from '@/components/IncidentTimeline';
@@ -16,11 +16,9 @@ type Incident = {
 export default function DashboardPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   // FIX: Initialize playback position at 0
-  const [playbackPosition, setPlaybackPosition] = useState(0);
-  const [isSeeking, setIsSeeking] = useState(false);
+  const [playbackPosition, setPlaybackPosition] = useState(0);;
   const [incidents, setIncidents] = useState<Incident[]>([]);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // This now only fetches the incident data for the timeline markers
