@@ -3,11 +3,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// This line tells Next.js to always run this route on the server at request time
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const incidents = await prisma.incident.findMany({
       orderBy: {
-        tsStart: 'asc', // Oldest first for timeline drawing
+        tsStart: 'asc',
       },
       include: {
         camera: true,
