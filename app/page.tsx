@@ -15,18 +15,31 @@ type Incident = {
 
 export default function DashboardPage() {
   const [isPlaying, setIsPlaying] = useState(false);
-  // FIX: Initialize playback position at 0
-  const [playbackPosition, setPlaybackPosition] = useState(0);;
+  const [playbackPosition, setPlaybackPosition] = useState(0);
   const [incidents, setIncidents] = useState<Incident[]>([]);
 
-
   useEffect(() => {
-    // This now only fetches the incident data for the timeline markers
+    // Fetches the incident data for the timeline markers
     fetch('/api/incidents/all')
       .then(res => res.json())
       .then((data: Incident[]) => setIncidents(data));
-      // FIX: Removed logic that automatically set the position on load
   }, []);
+
+  // This new useEffect creates a timer that moves the yellow line when isPlaying is true
+  useEffect(() => {
+    if (isPlaying) {
+      const interval = setInterval(() => {
+        setPlaybackPosition(prevPos => {
+          // Increment position and loop back to 0 if it reaches 100
+          const newPos = prevPos + 0.1;
+          return newPos >= 100 ? 0 : newPos;
+        });
+      }, 100); // The timer updates every 100 milliseconds
+
+      // This cleans up the timer when you pause or the component unmounts
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying]);
 
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col">
