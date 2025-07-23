@@ -6,15 +6,9 @@ generator client {
 }
 
 datasource db {
-  // Easiest for local dev. The DATABASE_URL in .env should be "file:./dev.db"
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
-
-  // If you prefer PostgreSQL, uncomment the following:
-  // provider = "postgresql"
-  // url = env("DATABASE_URL")
 }
-
 // Represents a CCTV camera feed
 model Camera {
   id        String     @id @default(cuid())
